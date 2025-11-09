@@ -4,6 +4,15 @@ import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import "./globals.css";
 
+import { Roboto } from "next/font/google";
+
+const robotoFont = Roboto({
+  weight: ["400", "500", "700"], 
+  variable: "--font-roboto",     
+  display: "swap",               
+  subsets: ["latin"],            
+});
+
 export const metadata = {
   title: "NoteHub",
   description: "Manage your notes efficiently",

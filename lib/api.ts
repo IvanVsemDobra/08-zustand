@@ -8,7 +8,7 @@ export interface NotesHttpResponse {
   totalPages: number;
 }
 
-// Інтерфейс для параметрів запиту нотаток
+
 interface FetchNotesParams {
   page: number;
   perPage: number;

@@ -1,4 +1,10 @@
 import css from "./page.module.css";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Notes App",
+  description: "App for creating and storing notes",
+};
 
 export default function Home() {
   return (

@@ -18,7 +18,8 @@
     "react-hot-toast": "^2.6.0",
     "react-paginate": "^8.3.0",
     "yap": "^0.0.2",
-    "yup": "^1.7.1"
+    "yup": "^1.7.1",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
