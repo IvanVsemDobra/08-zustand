@@ -1,83 +1,107 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createNote } from "@/lib/api";
-import css from "./NoteForm.module.css";
-import { Tag } from "@/types/note";
 import { useRouter } from "next/navigation";
-import { useNoteStore } from "@/lib/store/noteStore";
+import { useNoteDraftStore } from "@/lib/store/noteStore";
+import css from "./NoteForm.module.css";
+import type { DraftNote, Tag } from "@/types/note";
+import axios from "axios";
 
 export default function NoteForm() {
   const router = useRouter();
-  const { draft, setDraft, clearDraft } = useNoteStore();
+  const { draft, setDraft, clearDraft } = useNoteDraftStore();
 
-  const [title, setTitle] = useState(draft.title);
-  const [content, setContent] = useState(draft.content);
-  const [tag, setTag] = useState<Tag>(draft.tag);
+  const [formData, setFormData] = useState<DraftNote>(draft || {
+    title: "",
+    content: "",
+    tag: "Todo",
+    categoryId: "",
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  // Синхронізація стану форми з draft у store
+  // Синхронізація локального стану з draft у Zustand
   useEffect(() => {
-    setDraft({ title, content, tag });
-  }, [title, content, tag, setDraft]);
+    if (draft) {
+      setFormData(draft);
+    }
+  }, [draft]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    const updated = { ...formData, [name]: value };
+    setFormData(updated);
+    setDraft(updated);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
+    setError("");
 
-    const newNote = { title, content, tag };
-    await createNote(newNote);
+    try {
+      // POST запит для створення нотатки
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/notes`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
+          },
+        }
+      );
 
-    clearDraft(); // очищаємо draft після успішного створення
-    router.back(); // повертаємося на попередній маршрут
+      clearDraft();                // очищаємо draft після успішного створення
+      router.push("/notes/filter/all"); // редірект на всі нотатки
+    } catch (err) {
+      console.error(err);
+      setError("Failed to create note. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
-    router.back(); // повернення без очищення draft
+    // просто редірект, draft не чіпаємо
+    router.back();
   };
 
   return (
     <form onSubmit={handleSubmit} className={css.form}>
-      <label className={css.label}>
-        Title
-        <input
-          name="title"
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-      </label>
+      {error && <p className={css.error}>{error}</p>}
 
-      <label className={css.label}>
-        Content
-        <textarea
-          name="content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-      </label>
+      <input
+        name="title"
+        value={formData.title || ""}
+        onChange={handleChange}
+        placeholder="Title"
+        required
+      />
 
-      <label className={css.label}>
-        Tag
-        <select
-          name="tag"
-          value={tag}
-          onChange={(e) => setTag(e.target.value as Tag)}
-        >
-          <option value="Todo">Todo</option>
-          <option value="Work">Work</option>
-          <option value="Personal">Personal</option>
-          <option value="Meeting">Meeting</option>
-          <option value="Shopping">Shopping</option>
-        </select>
-      </label>
+      <textarea
+        name="content"
+        value={formData.content || ""}
+        onChange={handleChange}
+        placeholder="Content"
+        required
+      />
 
-      <div className={css.actions}>
-        <button type="button" onClick={handleCancel} className={css.cancelButton}>
-          Cancel
+      <select name="tag" value={formData.tag || "Todo"} onChange={handleChange}>
+        <option value="Todo">Todo</option>
+        <option value="Work">Work</option>
+        <option value="Personal">Personal</option>
+        <option value="Meeting">Meeting</option>
+        <option value="Shopping">Shopping</option>
+      </select>
+
+      <div className={css.buttons}>
+        <button type="submit" disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save"}
         </button>
-
-        <button type="submit" className={css.submitButton}>
-          Save Note
+        <button type="button" onClick={handleCancel}>
+          Cancel
         </button>
       </div>
     </form>

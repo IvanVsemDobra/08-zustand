@@ -38,7 +38,7 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
   };
 };
 
-// 🟢 Основна сторінка нотатки
+// Основна сторінка нотатки
 export default async function NoteDetailsPage({ params }: Props) {
   const { id } = await params;
 
