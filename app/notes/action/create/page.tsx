@@ -36,27 +36,20 @@ export default function CreateNotePage() {
         tag: draft.tag as Tag,
       };
 
-      console.log("🟢 Sending to API:", newNote);
       await createNote(newNote);
-
       clearDraft();
 
-      //  Гарне сповіщення
       toast.success("The note has been successfully created!", {
         duration: 3000,
         position: "top-right",
       });
 
-      // Невелика затримка перед редіректом
       setTimeout(() => {
         router.push(`/notes/filter/${draft.tag || "all"}`);
       }, 1000);
     } catch (err) {
       console.error("Failed to create note:", err);
-      toast.error("Failed to create the note. Please try again.", {
-        duration: 3000,
-        position: "top-right",
-      });
+      toast.error("Failed to create the note. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -65,28 +58,31 @@ export default function CreateNotePage() {
   return (
     <main className={css.main}>
       <div className={css.container}>
-        <h1 className={css.title}>Create Note +</h1>
+        <h1 className={css.title}>Create note</h1>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-xl mx-auto">
+        <form onSubmit={handleSubmit} className={css.form}>
+          <label className={css.label}>Title</label>
           <input
             type="text"
             placeholder="Enter note title"
             value={draft.title}
             onChange={handleChange("title")}
-            className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className={css.input}
           />
 
+          <label className={css.label}>Content</label>
           <textarea
             placeholder="Enter note content"
             value={draft.content}
             onChange={handleChange("content")}
-            className="border border-gray-300 rounded-lg p-2 min-h-[120px] focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className={css.textarea}
           />
 
+          <label className={css.label}>Tag</label>
           <select
             value={draft.tag}
             onChange={handleChange("tag")}
-            className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className={css.select}
           >
             <option value="Todo">Todo</option>
             <option value="Work">Work</option>
@@ -95,13 +91,22 @@ export default function CreateNotePage() {
             <option value="Shopping">Shopping</option>
           </select>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-          >
-            {isLoading ? "Creating..." : "Create"}
-          </button>
+          <div className={css.actions}>
+            <button
+              type="button"
+              className={css.cancelButton}
+              onClick={() => router.push("/notes/filter/all")}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={css.submitButton}
+            >
+              {isLoading ? "Creating..." : "Create note"}
+            </button>
+          </div>
         </form>
       </div>
     </main>
