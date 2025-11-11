@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { DraftNote, Tag } from "@/types/note";
+import type { DraftNote } from "@/types/note";
 
 type NoteDraftStore = {
   draft: DraftNote;
@@ -8,11 +8,13 @@ type NoteDraftStore = {
   clearDraft: () => void;
 };
 
+//  Додали дефолтне значення priority
 const initialDraft: DraftNote = {
   title: "",
   content: "",
   tag: "Todo",
   categoryId: "",
+  priority: "Low", 
 };
 
 export const useNoteDraftStore = create<NoteDraftStore>()(
@@ -28,3 +30,4 @@ export const useNoteDraftStore = create<NoteDraftStore>()(
     }
   )
 );
+

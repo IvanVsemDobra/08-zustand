@@ -3,6 +3,7 @@ import TanStackProvider from "@/components/TanStackProvider/TanStackProvider";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 import { Roboto } from "next/font/google";
 
 const robotoFont = Roboto({
@@ -31,6 +32,7 @@ export default function RootLayout({
           <Header />
           {children}
           {modal}
+          <Toaster position="top-right" reverseOrder={false} />
           <Footer />
         </TanStackProvider>
       </body>

@@ -10,25 +10,21 @@ export interface Note {
   updatedAt: string;
 }
 
+// Новий запис (тільки те, що API приймає)
 export interface NewNote {
   title: string;
-  content?: string; 
-  categoryId: string;
-}
-
-// Для форми та чернетки з тегом
-export interface DraftNote {
-  title: string;
-  content?: string;
+  content: string;
   tag: Tag;
-  categoryId: string;
+  categoryId?: string;
 }
 
-export interface NoteFormData {
+// Чернетка (для локального збереження)
+export interface DraftNote {
   title: string;
   content: string;
   tag: Tag;
   categoryId: string;
+  priority?: "Low" | "Medium" | "High"; // локальне поле, не відправляється
 }
 
 export interface CategoryType {

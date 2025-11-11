@@ -1,5 +1,5 @@
-import { editNote, NewNoteData } from "@/lib/api";
-import { Note } from "@/types/note";
+import { editNote } from "@/lib/api";
+import { Note, UpdateNoteData } from "@/types/note";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -15,7 +15,7 @@ const EditNoteForm = ({ note, closeForm }: Props) => {
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
-    mutationFn: (newNoteData: NewNoteData) => editNote(note.id, newNoteData),
+    mutationFn: (newNoteData: UpdateNoteData) => editNote(note.id, newNoteData),
     onSuccess() {
       queryClient.invalidateQueries({
         queryKey: ["note"],
