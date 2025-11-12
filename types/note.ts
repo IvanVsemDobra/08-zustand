@@ -4,10 +4,9 @@ export interface Note {
   id: string;
   title: string;
   content: string;
-  tag: Tag;
-  categoryId: string;
   createdAt: string;
   updatedAt: string;
+  tag: "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
 }
 
 // Новий запис (тільки те, що API приймає)
@@ -18,13 +17,24 @@ export interface NewNote {
   categoryId?: string;
 }
 
-// Чернетка (для локального збереження)
-export interface DraftNote {
+
+export interface NoteFormData {
   title: string;
   content: string;
-  tag: Tag;
-  categoryId: string;
-  priority?: "Low" | "Medium" | "High"; // локальне поле, не відправляється
+  tag: "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
+}
+
+export interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
+
+
+export interface FetchNotesParams {
+  page: number;
+  perPage: number;
+  search?: string;
+  tag?: string;
 }
 
 export interface CategoryType {
@@ -33,18 +43,6 @@ export interface CategoryType {
   description: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface FetchNotesResponse {
-  notes: Note[];
-  totalPages: number;
-}
-
-export interface FetchNotesParams {
-  page: number;
-  perPage: number;
-  search?: string;
-  tag?: string;
 }
 
 export interface UpdateNoteData {

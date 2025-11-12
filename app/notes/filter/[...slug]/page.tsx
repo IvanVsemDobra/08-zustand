@@ -8,7 +8,7 @@ interface Props {
   params: Promise<{ slug: string[] }>;
 }
 
-// 🟣 Динамічні метадані
+// Динамічні метадані
 export const generateMetadata = async ({ params }: Props): Promise<Metadata> => {
   const { slug } = await params;
 
@@ -38,7 +38,7 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
   };
 };
 
-// 🟢 Основна сторінка
+// Основна сторінка
 const NotesPage = async ({ params }: Props) => {
   const { slug } = await params;
   const slugArray: string[] = Array.isArray(slug) ? slug : slug ? [slug] : ["all"];
@@ -54,7 +54,7 @@ const NotesPage = async ({ params }: Props) => {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <NotesClient category={tag} />
+      <NotesClient tag={tag} />
     </HydrationBoundary>
   );
 };

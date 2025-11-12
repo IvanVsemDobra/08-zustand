@@ -1,20 +1,17 @@
+import { NoteFormData } from "@/types/note";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { DraftNote } from "@/types/note";
 
-type NoteDraftStore = {
-  draft: DraftNote;
-  setDraft: (note: DraftNote) => void;
+interface NoteDraftStore {
+  draft: NoteFormData;
+  setDraft: (note: NoteFormData) => void;
   clearDraft: () => void;
-};
+}
 
-//  Додали дефолтне значення priority
-const initialDraft: DraftNote = {
+const initialDraft: NoteFormData = {
   title: "",
   content: "",
   tag: "Todo",
-  categoryId: "",
-  priority: "Low", 
 };
 
 export const useNoteDraftStore = create<NoteDraftStore>()(
@@ -30,4 +27,3 @@ export const useNoteDraftStore = create<NoteDraftStore>()(
     }
   )
 );
-

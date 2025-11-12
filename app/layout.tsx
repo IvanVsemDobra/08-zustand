@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { Metadata } from "next";
 import TanStackProvider from "@/components/TanStackProvider/TanStackProvider";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
@@ -13,9 +14,22 @@ const robotoFont = Roboto({
   subsets: ["latin"],
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "NoteHub",
   description: "Manage your notes efficiently",
+  openGraph: {
+    title: "NoteHub — Smart Note Management",
+    description: "Organize, edit, and manage your notes efficiently with NoteHub.",
+    url: "https://notehub.goit.global/",
+    images: [
+      {
+        url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+        width: 1200,
+        height: 630,
+        alt: "NoteHub Open Graph Image",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

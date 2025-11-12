@@ -10,39 +10,38 @@ import NoteList from "@/components/NoteList/NoteList";
 import Loading from "@/app/loading";
 import Error from "./error";
 import Link from "next/link";
+import type { Tag } from "@/types/note";
 
-interface NotesClientProps {
-  category: string;
-}
 
-export default function NotesClient({ category }: NotesClientProps) {
+export default function NotesClient({ tag }: {  tag: Tag | string  }) {
   const [page, setPage] = useState(1);
-  const [topic, setTopic] = useState("");
+  const [search, setSearch] = useState("");
 
-  const debouncedSearch = useDebounce(topic, 500);
+  const debouncedSearch = useDebounce(search, 500);
 
+  // скидати сторінку при зміні пошуку або тегу
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, category]);
+  }, [debouncedSearch, tag]);
 
   const { data, isLoading, isError, isSuccess, error } = useQuery({
-    queryKey: ["notes", { search: debouncedSearch, category, page }],
+    queryKey: ["notes", { search: debouncedSearch, tag, page }],
     queryFn: () =>
       fetchNotes({
         page,
         perPage: 12,
-        tag: category,
+        tag,
         search: debouncedSearch,
       }),
     placeholderData: keepPreviousData,
-    refetchOnMount: false,
   });
 
   return (
     <div className={css.app}>
-      <SearchBox onSearch={setTopic} searchQuery={topic} />
+      <header className={css.toolbar}>
+      <SearchBox onSearch={setSearch} searchQuery={search} />
 
-      {isSuccess && data?.totalPages > 1 && (
+      {isSuccess && data?.totalPages && data.totalPages > 1 && (
         <Pagination
           totalPages={data.totalPages}
           currentPage={page}
@@ -53,7 +52,7 @@ export default function NotesClient({ category }: NotesClientProps) {
       <Link href="/notes/action/create" className={css.button}>
         Create note +
       </Link>
-
+      </header>
       {isLoading && <Loading />}
       {isError && <Error error={error} />}
       {data && <NoteList notes={data.notes} />}

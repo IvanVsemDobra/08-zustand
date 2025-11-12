@@ -2,60 +2,67 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNoteDraftStore } from "@/lib/store/noteStore";
-import type { DraftNote } from "@/types/note";
-import axios from "axios";
+import { createNote } from "@/lib/api";
+import type { NoteFormData, Tag } from "@/types/note";
+import toast from "react-hot-toast";
 import css from "./NoteForm.module.css";
 
 export default function NoteForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { draft, setDraft, clearDraft } = useNoteDraftStore();
 
-  // локальний стан форми
-  const [formData, setFormData] = useState<DraftNote>(draft);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState<NoteFormData>(draft);
 
-  // синхронізація форми із Zustand 
+  // синхронізація з Zustand
   useEffect(() => {
     setFormData(draft);
   }, [draft]);
 
-  // універсальна обробка зміни інпутів
+  // хендлер зміни полів
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    const updated = { ...formData, [name]: value };
+    const updated = { ...formData, [name]: value as string | Tag };
     setFormData(updated);
-    setDraft(updated); // оновлюємо у Zustand
+    setDraft(updated);
   };
 
-  // обробка сабміту форми
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSaving(true);
-    setError("");
-
-    try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/notes`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
-          },
-        }
-      );
-
-      clearDraft(); 
+  // мутація створення нотатки через TanStack Query
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const newNote = {
+        title: formData.title.trim(),
+        content: formData.content.trim(),
+        tag: formData.tag,
+      };
+      return await createNote(newNote);
+    },
+    onSuccess: () => {
+      // інвалідуємо кеш, щоб оновити список нотаток
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      clearDraft();
+      toast.success("The note has been successfully created!", {
+        duration: 3000,
+        position: "top-right",
+      });
       router.push("/notes/filter/all");
-    } catch (err) {
-      console.error(err);
-      setError("Не вдалося створити нотатку. Спробуйте ще раз.");
-    } finally {
-      setIsSaving(false);
+    },
+    onError: () => {
+      toast.error("Failed to create the note. Please try again.");
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!formData.title.trim() || !formData.content.trim()) {
+      toast.error("Please fill in all the fields.");
+      return;
     }
+    mutation.mutate();
   };
 
   const handleCancel = () => {
@@ -64,8 +71,6 @@ export default function NoteForm() {
 
   return (
     <form onSubmit={handleSubmit} className={css.form}>
-      {error && <p className={css.error}>{error}</p>}
-
       <input
         name="title"
         type="text"
@@ -83,11 +88,7 @@ export default function NoteForm() {
         required
       />
 
-      <select
-        name="tag"
-        value={formData.tag}
-        onChange={handleChange}
-      >
+      <select name="tag" value={formData.tag} onChange={handleChange}>
         <option value="Todo">Todo</option>
         <option value="Work">Work</option>
         <option value="Personal">Personal</option>
@@ -96,8 +97,8 @@ export default function NoteForm() {
       </select>
 
       <div className={css.buttons}>
-        <button type="submit" disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save"}
+        <button type="submit" disabled={mutation.isPending}>
+          {mutation.isPending ? "Saving..." : "Save"}
         </button>
         <button type="button" onClick={handleCancel}>
           Cancel
